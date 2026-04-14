@@ -55,20 +55,34 @@ WildRydes.map = WildRydes.map || {};
 
     // Register click handler for #request button
     $(function onDocReady() {
-        $('#request').click(handleRequestClick);
-        $(WildRydes.map).on('pickupChange', handlePickupChanged);
+    // 1. 초기 로딩 시 URL 설정 확인 로그
+    console.log("[Debug] 현재 설정된 API URL:", _config.api.invokeUrl);
 
-        WildRydes.authToken.then(function updateAuthMessage(token) {
-            if (token) {
-                displayUpdate('You are authenticated. Click to see your <a href="#authTokenModal" data-toggle="modal">auth token</a>.');
-                $('.authToken').text(token);
-            }
-        });
-
-        if (!_config.api.invokeUrl) {
-            $('#noApiMessage').show();
-        }
+    $('#request').click(function(event) {
+        console.log("[Debug] 유니콘 요청 버튼 클릭됨!");
+        handleRequestClick(event);
     });
+
+    $(WildRydes.map).on('pickupChange', handlePickupChanged);
+
+    WildRydes.authToken.then(function updateAuthMessage(token) {
+        if (token) {
+            // 2. 인증 토큰 정상 로드 확인 로그
+            console.log("[Debug] 인증 토큰 획득 성공 (앞 10자리):", token.substring(0, 10) + "...");
+            displayUpdate('You are authenticated. Click to see your <a href="#authTokenModal" data-toggle="modal">auth token</a>.');
+            $('.authToken').text(token);
+        } else {
+            console.warn("[Debug] 인증 토큰이 없습니다. 로그인이 필요할 수 있습니다.");
+        }
+    }).catch(function(err) {
+        console.error("[Debug] 토큰을 가져오는 중 에러 발생:", err);
+    });
+
+    if (!_config.api.invokeUrl) {
+        console.error("[Debug] _config.api.invokeUrl이 비어있습니다! config.js 파일을 확인하세요.");
+        $('#noApiMessage').show();
+    }
+});
 
     function handlePickupChanged() {
         var requestButton = $('#request');
